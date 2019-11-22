@@ -1,0 +1,93 @@
+---
+author:
+title: "EDAV Fall 2019 PSet 5, part A"
+
+---
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = TRUE)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(ggmap)
+library(leaflet)
+```
+
+This assignment is designed to help you get started on the final project. Be sure to review the final project instructions (https://edav.info/project.html), in particular the new section on reproducible workflow (https://edav.info/project.html#reproducible-workflow), which summarizes principles that we've discussed in class.
+    
+### 1. The Team
+
+[2 points]
+
+a) Who's on the team? (Include names and UNIs)
+
+Wancheng Chen; Chengchao Jin; Hanjun Li; Zijian Wang
+
+b) How do you plan to divide up the work? (Grading is on a group basis. The point of asking is to encourage you to think about this.)
+
+While Zijian Wang focuses on studying the relationship between a house's rental price and its unique house features, Chengchao Jin studies the relationship between a house's rental price and its spatial features.
+Wancheng Chen and Hanjun Li would like to do interacitve tools based on shiny app to help display our conclusions.
+
+### 2. The Questions
+
+[6 points]
+
+List three questions that you hope you will be able to answer from your research.
+
+a) The relationship between variable 'price' of a house and its spatial features.
+
+b) The relationship between variable 'price' of a house and its unique house features.
+
+c) The relationship between variable 'price' of a house and its neighborhoods.
+
+### 3. Which output format do you plan to use to submit the project? 
+
+[2 points]
+
+We are planning to submit the project in the html file format. Besides, we want to use Shinny app to do some interactive applications. 
+
+
+(Remember that it's ok to have pieces of the project that don't fit into the chosen output format; in those cases you can provide links to the relevant material.)
+
+### 4. The Data
+
+What is your data source?  What is your method for importing data? Please be specific. Provide relevant information such as any obstacles you're encountering and what you plan to do to overcome them.
+
+Our data source are from website: http://insideairbnb.com/get-the-data.html
+In this website, we can get the attribute for the rental apartments in specific areas that are on the list.
+We just download the raw data and delete the unnecessary features in the rental list.
+Now we are trying to get more geographic data in New York to find the spatial data's contribution to rental prices.
+
+### 5. Provide a short summary, including 2-3 graphs, of your initial investigations. 
+
+```{r}
+listing <- read.csv(file="listings-2.csv", header=TRUE, sep=",")
+map <- leaflet(listing) %>% addTiles('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', 
+	attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>') 
+beatCol <- colorFactor(palette = 'RdYlGn', listing$room_type)
+map %>% setView(-73.9712,40.7831,zoom = 10) %>% 
+  addCircles(data=listing, ~longitude, ~latitude, popup=~price, weight = 3, radius=5, 
+             color=~beatCol(room_type), stroke = TRUE, fillOpacity = 0.6) %>%
+  addLegend('bottomright', pal = beatCol, values = listing$room_type,
+            title = 'Room Type of Rental House in New York',
+            opacity = 1)
+```
+
+From the map we can find that room type of 'entire home/apt' and 'private room' are two major type of the rental house. Except some areas in Staten Island, rental houses are evenly distributted in the whole city.
+
+```{r}
+ggplot(listing, aes(price)) +
+  geom_histogram(col = "black", fill = "light blue") +
+  facet_wrap(~room_type, scales = "free") +
+  ggtitle("Histogram of 'Price' by Room Type") 
+```
+From the distribution of house prices for all types of the rental houses, we could see that the distribution is very right-skewed. Meanwhile, the prices of 'Entire home/apt' and 'Private room' are comparing greater than the prices of 'Hotel room' and 'Shared room'.
+
+```{r}
+ggplot(listing, aes(number_of_reviews,fill=room_type)) +
+  geom_histogram(col = "black", fill = "light blue") +
+  facet_wrap(~room_type, scales = "free") +
+  ggtitle("Histogram of 'Number of Reviews' by Room Type") 
+```
+
+From the distribution of number of reviews for all types of the rental houses, we could see that the distribution is very right-skewed. Meanwhile, the number of reviews of 'Private room' are comparing greater than the rest of three types of houses.
+
