@@ -53,8 +53,8 @@ We are planning to submit the project in the html file format. Besides, we want 
 What is your data source?  What is your method for importing data? Please be specific. Provide relevant information such as any obstacles you're encountering and what you plan to do to overcome them.
 
 Our data source are from website: http://insideairbnb.com/get-the-data.html
-In this website, we can get the attribute for the rental apartments in specific areas that are on the list.
-We just download the raw data and delete the unnecessary features in the rental list.
+In this website, we can get the attributes for the rental apartments in specific areas that are on the list.
+We just downloaded the raw data and delete the unnecessary features in the rental list.
 Now we are trying to get more geographic data in New York to find the spatial data's contribution to rental prices.
 
 ### 5. Provide a short summary, including 2-3 graphs, of your initial investigations. 
@@ -72,7 +72,7 @@ map %>% setView(-73.9712,40.7831,zoom = 10) %>%
             opacity = 1)
 ```
 
-From the map we can find that room type of 'entire home/apt' and 'private room' are two major type of the rental house. Except some areas in Staten Island, rental houses are evenly distributted in the whole city.
+From the map we can find that 'entire home/apt' and 'private room' tend to be the two most common types of the rental house accross New York; however, rental house types are evenly distributted on Staten Island.
 
 ```{r}
 ggplot(listing, aes(price)) +
@@ -80,7 +80,8 @@ ggplot(listing, aes(price)) +
   facet_wrap(~room_type, scales = "free") +
   ggtitle("Histogram of 'Price' by Room Type") 
 ```
-From the distribution of house prices for all types of the rental houses, we could see that the distribution is very right-skewed. Meanwhile, the prices of 'Entire home/apt' and 'Private room' are comparing greater than the prices of 'Hotel room' and 'Shared room'.
+
+From the distribution of house prices for all types of the rental houses, we could see that the distribution is highly right-skewed. Meanwhile, the prices of 'Entire home/apt' and 'Private room' are relatively greater than the prices of 'Hotel room' and 'Shared room'.
 
 ```{r}
 ggplot(listing, aes(number_of_reviews,fill=room_type)) +
@@ -89,5 +90,5 @@ ggplot(listing, aes(number_of_reviews,fill=room_type)) +
   ggtitle("Histogram of 'Number of Reviews' by Room Type") 
 ```
 
-From the distribution of number of reviews for all types of the rental houses, we could see that the distribution is very right-skewed. Meanwhile, the number of reviews of 'Private room' are comparing greater than the rest of three types of houses.
-
+From the distribution of number of reviews for all types of the rental houses, we could see that the distribution is highly right-skewed as well. The average number of reviews for 'Private room' appears to be the highest as the trend for all four room types are similar while some 'Private room' have number of reviews exceeding 600. In order to verify this, we need further investigation on the 
+variable **number_of_reviews**.
