@@ -1,0 +1,152 @@
+---
+title: "EDAV Final Project: Airbnb"
+author: "Wancheng Chen (wc2687); Chengchao Jin (cj2628); Hanjun Li (hl3339); Zijian Wang (zw2606)"
+date: "12/11/2019"
+output: html_document
+---
+
+```{r, echo=FALSE, message = FALSE, warning=FALSE}
+devtools::install_github("lchiffon/wordcloud2")  
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(tidyverse)
+library(tidytext)
+library(stringr)
+library(tm)
+library(wordcloud)
+library(memoise)
+library(shiny)
+library(naniar)
+library(janeaustenr)
+library(wordcloud2)
+library(RColorBrewer)
+library(qdapDictionaries)
+```
+
+## Introduction
+As we approach the end of semester, many students are graduating. Although the commencement would not be held until next May, some students would like to plan ahead and reserve accommodation for their parents and friends to stay. Compare to hotel, Airbnb, the largest peer-to-peer exchange service for hospitality around the world, is arguably a more budget-friendly choice for short-term visitors. Moreover, some services at Airbnb, such as kitchen usage, might only be available in those high-end hotels, which provides an advantage over staying at the hotel. As a result, we would like to investigate the NYC Airbnb dataset, specifically rental prices range from 100 to 400, and propose the following three questions:  
+**(1) How would price of a listed property correlate with the housing type in the New York City? **
+
+**(2) How would seasonality affect the price of the listed property?**  
+
+**(3) How are superhosts different from non superhosts? **  
+*Note: superhosts are experienced hosts who provide a shining example for other hosts, and extraordinary experiences for their guests.*  
+
+
+### A quick glance of Airbnb in New York City
+* There are overall 48377 unique listing in NYC and the first rental listed in NYC was up in August 22, 2008.  
+* Over 1.16 million reviews have been written by guests since then  
+* The price for a listing ranges from $10 per night to $10000 per night
+* Fun Fact: One listing has 40 beds and one host has total listing count of 1611 
+
+```{r, message = FALSE, warning=FALSE}
+
+review2<-read_csv("~/Documents/Columbia/STAT W5702/Final/review_sample_csv.csv")
+review_words<-review2%>%unnest_tokens(word,comments)%>%count(listing_id,word,sort = TRUE)
+unique_english<-unique(review_words$word)[unique(review_words$word)%in%GradyAugmented]
+review_words<-review_words[review_words$word%in%unique_english,]
+
+docs<-Corpus(VectorSource(review_words$word))
+docs<-tm_map(docs,removeWords,stopwords("english"))
+docs <- tm_map(docs,removePunctuation)
+docs <- tm_map(docs, removeWords, c("place","location", "get", "will", "also", "make", "apartment","de", "super","us","just","really","room","time","felt","area"))
+newdf <- data.frame(text=sapply(docs, identity), 
+    stringsAsFactors=F)
+newdff <- newdf %>% filter(text != "")
+wordDF <- newdff %>% count(text, sort = TRUE) %>% 
+  ungroup()
+wordDF2<-wordDF
+text<-c("sure","eat","air","deal","food","la","flat")
+wordDF2[wordDF2$text%in%text,]$text<-c("love","home","great","nice","good","clean","cool")
+letterCloud(wordDF2, word = "Airbnb", wordSize =1,color="#ff5a5f")
+```
+
+
+## Data sources
+We downloaded the New York City Airbnb datasets, including `listings.csv.gz`, `calendar.csv.gz`, `reviews.csv.gz`, `neighbourhoods.geojson` and etc., from the Airbnb open data source: http://insideairbnb.com/get-the-data.html.  
+
+* `listings.csv.gz`: a detailed listing data for New York City, which entails features such as rental prices per night, host information, geological location, housing features, and availabilities. The majority part of data usage in our report come from this csv file.  
+* `calendar.csv.gz`: a detailed calendar data for listings in New York City, which was used for our seasonality analysis.  
+* `reviews.csv.gz`: a detailed review data for listings in New York City. We built our wordcloud based upon this dataset.  
+* `neighbourhoods.geojson`: a GeoJSON file of neighbourhoods of the city. We mainly use it to visualize our maps and develop a shiny app.  
+* `listings.csv`: a brief summary of information and metrics for listings in New York City, which was used in our preliminary summary statistics; however, due to the limited features in the dataset, we did not focus on this csv file.  
+* `neighbourhoods.csv`: a neighbourhood list for geo filter. It is sourced from city or open source GIS files and we use it to get a better understanding of the counties and districts in New York City.
+
+
+## Data transformation
+the original dataset `listings.csv.gz` has 48377 observations and 106 variables. We first went over each column and decided to drop the ones that we were for sure not going to examine. This resulted in a dataset of 48377 observations and 78 variables.  
+
+* We first look at the number of missing values in the dataset and ranked the variables with N/A's in descending order with respect to number of N/A's. We noticed that variables such as *license*, *square_feet*, and *weekly_price* have more than 40000 missing values, so we would want to drop those columns with more than 40000 N/A's.
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+raw_data <- read_csv("~/Documents/Columbia/STAT W5702/Final/listings.csv")
+na.cols <- which(colSums(is.na(raw_data)) > 0) # Returns indices for all predictors with N/A's
+sort(colSums(sapply(raw_data[na.cols], is.na)), decreasing = TRUE) # Order predictors with N/A's in descending order w.r.t. number of N/A's
+# removw the ones with excessive missing data
+raw_data <- raw_data %>% select(colnames(raw_data[colSums(is.na(raw_data)) <= 40000]))
+```
+* We want to also remove the columns with only 1 unique values as containing only 1 value is not likely to affect our result
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+one_value_col <- which(sapply(sapply(raw_data, unique), length)==1)
+raw_data <- raw_data %>% select(-one_value_col)
+```
+* We want to change some variables to our desired data type. For instance, `price`, `security deposit`, `cleaning_fee` and `extra_people` are in character type with a dollar sign $ and two decimal places for cents after, so we would like to change them to numeric type and drop the dollar signs in both `listings.csv.gz` and `calendar.csv.gz`. We applied the same procedure to change the variables in percentage form to numeric. For the Dates such as `host_since`, `first_review`, and `last_review`, we changed them from character type to Date type so we could use time-series directly. Moreover, we changed character variables such as `neighbourhood`, `property_type`, and `room_type` to factor as we believed it would be easier to facet while graphing in ggplot. 
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# change the prices from character to numeric
+raw_data[,c("price","security_deposit","cleaning_fee","extra_people")]<-sapply(raw_data[,c("price","security_deposit","cleaning_fee","extra_people")],parse_number)
+# change the percentage from character to numeric
+raw_data$host_response_rate <- parse_number(raw_data$host_response_rate)
+# change the date variables from character to date
+raw_data$host_since <- ymd(raw_data$host_since)
+raw_data$first_review <- ymd(raw_data$first_review)
+raw_data$last_review <- ymd(raw_data$last_review)
+# change some of the character variables to factors
+raw_data[,c("neighbourhood","neighbourhood_cleansed","neighbourhood_group_cleansed","property_type","room_type","bed_type","cancellation_policy")] <- as.data.frame(sapply(raw_data[,c("neighbourhood","neighbourhood_cleansed","neighbourhood_group_cleansed","property_type","room_type","bed_type","cancellation_policy")], as.factor))
+# change the logical variables to factors
+IndexLogical <- which(sapply(raw_data, is.logical))
+raw_data[,IndexLogical] <- as.data.frame(sapply(raw_data[,IndexLogical],as.factor))
+```
+* Further, we remove the observations with price equals to 0 since we consider it uncommon and unreasonable to stay over without paying. Same reasoning applied to host_listings_count, and host_total_listings_count since those two variables can not be 0 while the corresponding listings appeared in the dataset.
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+raw_data <- raw_data %>% filter(price>0 & host_listings_count>0 & host_total_listings_count>0)
+```
+* The resulting dataset has **46386** observations and **66** variables. 
+
+## Missing values
+Some featuers such as `security_deposit` and `review_scores_communication` still have approximately 10000 missing data while other features such as `host_response_rate` and `neighbourhood` have minimal missing data compared to the total number of rows. There are two reasons that we did not impute or fill the missing values in those variables:   
+
+(1) It is hard to infer a value for those missing cells. For instance, the following `gg_miss_upset` graph reveals that varaibles regarding review scores are likely to miss altogehter. We could not fill a missing cell in review_scores_cleanliness by finding the correlation between review_scores_cleanliness and the other review_scores subsection. Therefore, instead of taking a wild guess, we would rather keep them as N/A's.
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+na.cols2 <- which(colSums(is.na(raw_data)) > 0) # Returns indices for all predictors with N/A's after preliminary data cleaning
+# sort(colSums(sapply(raw_data[na.cols2], is.na)), decreasing = TRUE) # Order predictors with N/A's in descending order w.r.t. number of N/A's
+gg_miss_upset(raw_data, nsets=10)
+```
+
+(2) For the ones with minimal missing values such as `bathrooms`, `beds`, and `neighbourhood`, as we can see from the plot below, their missing perentage are very close to 0. Hence, when we conduct data analysis to investigate our problems, we could simply omit those observations without affecting our general patterns. We did not remove those observations since we want to retain the completeness of our dataset.
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+gg_miss_var(raw_data[na.cols2], show_pct = TRUE) + labs(y = "Missing Percentage", title = "Missing Percentage in Variables containing NA") + theme_grey(13)
+```
+
+## Results
+
+## Interactive component
+
+## Conclusion
+From this exploratory data analysis and visualization project, we gained a better understanding of the Airbnb rental market in New York City. After performing some data analysis, we have summrize the answers to our proposed questions as following:
+
+**How would price of a listed property correlate with the housing type in the New York City? **
+
+**How would seasonality affect the price of the listed property?**
+
+**How are superhosts different from non superhosts? **  
+
+### Limitation:
+* 
+
+### Further Improvement and Future Direction:
+* There are two major areas we want to improve on. The first major area is on data cleaning. If we want to examine questions regarding `security_deposit` or `host_response_rate`, which contain large amount of N/A's, we could try to run regression or predictive modeling on other related features to fill out the N/A's. In addtion, the utilization of "merging preditors" is a starting point in our mind. For instance, `cleaning_fee` is a mandatory fee charged to the subletters, but it is not included in the listed price. In order to figure out the actual cost of each night of stay, we could merge the variable `cleaning_fee` and `price` to get a new column `acutal_price`, which would improve the accuracy of our result. We would also want to improve the interactivity of some of our graphs. For instance, we could build a shiny wordcloud, which enables us to filter the desired frequencies.
+
+* We want to expand our analysis by including some variables that haven't used in our project and potentially including some outside data resoureces such as the New York City metro data and crime rate data. By incorporating the metro dataset, we can analyze how would transportation affects the price per stay. Intuitively, if an Airbnb is hosted near metro lanes, the price is likely to be higher and we would want to verify that. Also, a high crime rate might imply a lower price and lower occupancy rate. Last but not least, we plan to add more features to our shinyapp. For example, we could add options to calculate the total cost of staying, which includes the price of staying per se, the cleaning fee as well as the extra guests, and our price sliderbar would reflect the actual price.
