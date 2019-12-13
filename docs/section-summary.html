@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 9 Summary | AIRBNB Listing Data Analysis</title>
+  <meta name="description" content="Chapter 9 Summary | AIRBNB Listing Data Analysis" />
+  <meta name="generator" content="bookdown 0.16 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 9 Summary | AIRBNB Listing Data Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 9 Summary | AIRBNB Listing Data Analysis" />
+  
+  
+  
+
+<meta name="author" content="Wancheng Chen (wc2687); Chengchao Jin (cj2628); Hanjun Li (hl3339); Zijian Wang (zw2606)" />
+
+
+<meta name="date" content="2019-12-12" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="section-interactive-component.html"/>
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
+<link href="libs/wordcloud2-0.0.1/wordcloud.css" rel="stylesheet" />
+<script src="libs/wordcloud2-0.0.1/wordcloud2-all.js"></script>
+<script src="libs/wordcloud2-0.0.1/hover.js"></script>
+<script src="libs/wordcloud2-binding-0.2.2/wordcloud2.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.0.3/leaflet.js"></script>
+<script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script>
+<script src="libs/leaflet-providers-plugin-2.0.3/leaflet-providers-plugin.js"></script>
+<script src="libs/lfx-heat-0.1.0/lfx-heat-prod.js"></script>
+<script src="libs/lfx-heat-0.1.0/lfx-heat-bindings.js"></script>
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">EDAV</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#section-a-quick-glance-of-airbnb-in-new-york-city"><i class="fa fa-check"></i><b>1.1</b> A quick glance of Airbnb in New York City</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="section-data-sources.html"><a href="section-data-sources.html"><i class="fa fa-check"></i><b>2</b> Data sources</a></li>
+<li class="chapter" data-level="3" data-path="section-data-transformation.html"><a href="section-data-transformation.html"><i class="fa fa-check"></i><b>3</b> Data transformation</a></li>
+<li class="chapter" data-level="4" data-path="section-missing-values.html"><a href="section-missing-values.html"><i class="fa fa-check"></i><b>4</b> Missing values</a></li>
+<li class="chapter" data-level="5" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html"><i class="fa fa-check"></i><b>5</b> Analysis of Calendar Data</a><ul>
+<li class="chapter" data-level="5.1" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-analysis-of-seasonality-and-time-effect"><i class="fa fa-check"></i><b>5.1</b> Analysis of Seasonality and Time Effect</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-time-effect-on-demand"><i class="fa fa-check"></i><b>5.1.1</b> Time effect on demand</a></li>
+<li class="chapter" data-level="5.1.2" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-time-effect-on-price"><i class="fa fa-check"></i><b>5.1.2</b> Time effect on price</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-booked-housing-vs.-available-listing"><i class="fa fa-check"></i><b>5.2</b> Booked Housing VS. Available Listing</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-mean-price-comparison"><i class="fa fa-check"></i><b>5.2.1</b> Mean price comparison</a></li>
+<li class="chapter" data-level="5.2.2" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-proportion-comparison-with-binned-price"><i class="fa fa-check"></i><b>5.2.2</b> Proportion Comparison with Binned Price</a></li>
+<li class="chapter" data-level="5.2.3" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-minimum-night"><i class="fa fa-check"></i><b>5.2.3</b> Minimum night</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="section-analysis-of-calendar-data.html"><a href="section-analysis-of-calendar-data.html#section-average-price-comparison-based-on-weekdays"><i class="fa fa-check"></i><b>5.3</b> Average Price Comparison based on Weekdays</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html"><i class="fa fa-check"></i><b>6</b> Analysis for Superhost</a><ul>
+<li class="chapter" data-level="6.1" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-preliminary-analysis"><i class="fa fa-check"></i><b>6.1</b> preliminary analysis</a></li>
+<li class="chapter" data-level="6.2" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-benefits-of-becomming-a-superhost"><i class="fa fa-check"></i><b>6.2</b> Benefits of becomming a superhost:</a><ul>
+<li class="chapter" data-level="6.2.1" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-whether-superhost-set-higher-price"><i class="fa fa-check"></i><b>6.2.1</b> Whether superhost set higher price?</a></li>
+<li class="chapter" data-level="6.2.2" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-whether-superhost-recieve-more-attention-than-none-superhost"><i class="fa fa-check"></i><b>6.2.2</b> Whether superhost recieve more attention than none superhost</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-how-to-become-a-supper_host"><i class="fa fa-check"></i><b>6.3</b> How to become a supper_host</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-whether-host-should-put-more-house-on-it"><i class="fa fa-check"></i><b>6.3.1</b> Whether host should put more house on it?</a></li>
+<li class="chapter" data-level="6.3.2" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-what-cancellation-policy-should-host-choose"><i class="fa fa-check"></i><b>6.3.2</b> What cancellation policy should host choose?</a></li>
+<li class="chapter" data-level="6.3.3" data-path="section-analysis-for-superhost.html"><a href="section-analysis-for-superhost.html#section-what-kind-of-scores-should-the-host-pay-more-attention"><i class="fa fa-check"></i><b>6.3.3</b> What kind of scores should the host pay more attention?</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html"><i class="fa fa-check"></i><b>7</b> Geospatial Analysis</a><ul>
+<li class="chapter" data-level="7.1" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room-type"><i class="fa fa-check"></i><b>7.1</b> Study of Variable ‘Room type’</a></li>
+<li class="chapter" data-level="7.2" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room-count"><i class="fa fa-check"></i><b>7.2</b> Study of Variable ‘Room count’</a></li>
+<li class="chapter" data-level="7.3" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room_rate"><i class="fa fa-check"></i><b>7.3</b> Study of Variable ‘Room_rate’</a></li>
+<li class="chapter" data-level="7.4" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room_price"><i class="fa fa-check"></i><b>7.4</b> Study of Variable ‘Room_price’</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="section-interactive-component.html"><a href="section-interactive-component.html"><i class="fa fa-check"></i><b>8</b> Interactive component</a></li>
+<li class="chapter" data-level="9" data-path="section-summary.html"><a href="section-summary.html"><i class="fa fa-check"></i><b>9</b> Summary</a><ul>
+<li class="chapter" data-level="9.1" data-path="section-summary.html"><a href="section-summary.html#section-conclusion"><i class="fa fa-check"></i><b>9.1</b> Conclusion</a></li>
+<li class="chapter" data-level="9.2" data-path="section-summary.html"><a href="section-summary.html#section-limitation"><i class="fa fa-check"></i><b>9.2</b> Limitation:</a></li>
+<li class="chapter" data-level="9.3" data-path="section-summary.html"><a href="section-summary.html#section-further-improvement-and-future-direction"><i class="fa fa-check"></i><b>9.3</b> Further Improvement and Future Direction:</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">AIRBNB Listing Data Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="section-summary" class="section level1">
+<h1><span class="header-section-number">Chapter 9</span> Summary</h1>
+<div id="section-conclusion" class="section level2">
+<h2><span class="header-section-number">9.1</span> Conclusion</h2>
+<p>From this exploratory data analysis and visualization project, we gained a better understanding of the Airbnb rental market in New York City. After performing some data analysis, we have summrize the answers to our proposed questions as following:</p>
+<p><strong>How would seasonality affect the price of the listed property?</strong>
+The demand of Airbnb housings in New York area is largely affected by long breaks. The demand exhibits immediate increase at the beginning of winter, spring and summer vacations. Correspondingly, the average prices steeply increase during these days. Also, the mean prices vary on weekdays. The prices on Friday and Saturday are higher than any of those from Sunday to Thursday. According to the calendar data, we discover that cheaper Airbnb housing are much more popular than more expensive ones in New York as well. In conclusion, it is more economical to avoid long vacations and weekends to travel to New York if we can flexibly design our traveling schedule and book housing as early as possible.</p>
+<p><strong>How are superhosts different from non superhosts? </strong></p>
+<ol style="list-style-type: decimal">
+<li><p>When look at the review scores concerning cleanliness, communication, location, checkin, accuracy, superhost beat none superhost in every aspect. That means super host provide better services for customer. Take a deeper look, we find that super host did especially well on accuracy, checkin and communication, while for cleanliness and location, both superhost and none superhost have a lot of room for improvement.</p></li>
+<li><p>Superhost tend to have more strict cancellation policy with 14 grace period, and none superhost tend to have either strict or flexible cancellation policy.</p></li>
+<li><p>As for the price set by superhost, superhost set higher price regarding to Hotel type houses compare with none superhost. We suspect that hotel need credibility, and superhost is a credibility for the host.</p></li>
+<li><p>Superhost tend to recieve more attention compare with none superhost, according to the review number for host property.</p></li>
+</ol>
+<p><strong>How would location factors affect rental houses? </strong>
+For house numbers, neighborhoods that are full of history and beautiful brownstones or have convenience of the transition and the high population are likely to have greater numbers. Besides, we are interesed to find that the areas with greater number corresponds with subway line presence.
+For house prices, neighborhoods that are convenient of the transition usually have higher prices. Overall, the rating and price of rental houses in New York City is comparing high. In Staten island, the areas close to the State Park have the high scores. Brooklyn neighborhoods close to Manhattan tend to have higher scores.</p>
+</div>
+<div id="section-limitation" class="section level2">
+<h2><span class="header-section-number">9.2</span> Limitation:</h2>
+<ul>
+<li>We only use one year calendar data. There might exist some bias on data if we only use one year data to analyze seasonality effect.</li>
+<li>The distribution of the rental houses can not fully cover the range of New York City. There exists situations that the coordinate system data does not match with the real location.</li>
+<li>The web render is not fast enough due to the large number of observations in the data.</li>
+<li>There are many factors influence the price, however, due to the limitation of time, we just study two features which are location and room_type. For example, property type and cancellation policy might affect price. if we can control these variable the same and only make host the changing variable, the result will be more convincing.</li>
+<li>When we analyze the benefit of super host, we first analyze the price that super host set, second analyze the review super host recieve. However, review is not a strong indicater of the attention recieved. For example, some customer would not give review, and some review might be fake. The best indicator for the attention recieved is the total amount of contract make. Because contract is more authentic compare with review.</li>
+<li>When analzing how can one person become a superhost, we only give three suggestions. However, there are many features remain to be analyzed for example bed type and property type.</li>
+</ul>
+</div>
+<div id="section-further-improvement-and-future-direction" class="section level2">
+<h2><span class="header-section-number">9.3</span> Further Improvement and Future Direction:</h2>
+<ul>
+<li><p>There are two major areas we want to improve on. The first major area is on data cleaning. If we want to examine questions regarding <code>security_deposit</code> or <code>host_response_rate</code>, which contain large amount of N/A’s, we could try to run regression or predictive modeling on other related features to fill out the N/A’s. In addtion, the utilization of “merging preditors” is a starting point in our mind. For instance, <code>cleaning_fee</code> is a mandatory fee charged to the subletters, but it is not included in the listed price. In order to figure out the actual cost of each night of stay, we could merge the variable <code>cleaning_fee</code> and <code>price</code> to get a new column <code>acutal_price</code>, which would improve the accuracy of our result. We would also want to improve the interactivity of some of our graphs. For instance, we could build a shiny wordcloud, which enables us to filter the desired frequencies.</p></li>
+<li><p>We want to expand our analysis by including some variables that haven’t used in our project and potentially including some outside data resoureces such as the New York City metro data and crime rate data. By incorporating the metro dataset, we can analyze how would transportation affects the price per stay. Intuitively, if an Airbnb is hosted near metro lanes, the price is likely to be higher and we would want to verify that. Also, a high crime rate might imply a lower price and lower occupancy rate. Last but not least, we plan to add more features to our shinyapp. For example, we could add options to calculate the total cost of staying, which includes the price of staying per se, the cleaning fee as well as the extra guests, and our price sliderbar would reflect the actual price.</p></li>
+</ul>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="section-interactive-component.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/zheliman/5702Project/edit/master/09-conclusion.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/zheliman/5702Project/blob/master/09-conclusion.Rmd",
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

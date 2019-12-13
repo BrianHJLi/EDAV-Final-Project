@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 6 sss | AIRBNB Listing Data Analysis</title>
+  <meta name="description" content="Chapter 6 sss | AIRBNB Listing Data Analysis" />
+  <meta name="generator" content="bookdown 0.16 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 6 sss | AIRBNB Listing Data Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 6 sss | AIRBNB Listing Data Analysis" />
+  
+  
+  
+
+<meta name="author" content="Wancheng Chen (wc2687); Chengchao Jin (cj2628); Hanjun Li (hl3339); Zijian Wang (zw2606)" />
+
+
+<meta name="date" content="2019-12-12" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="section-time-series.html"/>
+<link rel="next" href="section-geospatial-analysis.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.0.3/leaflet.js"></script>
+<script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script>
+<script src="libs/leaflet-providers-plugin-2.0.3/leaflet-providers-plugin.js"></script>
+<script src="libs/lfx-heat-0.1.0/lfx-heat-prod.js"></script>
+<script src="libs/lfx-heat-0.1.0/lfx-heat-bindings.js"></script>
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">EDAV</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#section-a-quick-glance-of-airbnb-in-new-york-city"><i class="fa fa-check"></i><b>1.1</b> A quick glance of Airbnb in New York City</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="section-data-sources.html"><a href="section-data-sources.html"><i class="fa fa-check"></i><b>2</b> Data sources</a></li>
+<li class="chapter" data-level="3" data-path="section-data-transformation.html"><a href="section-data-transformation.html"><i class="fa fa-check"></i><b>3</b> Data transformation</a></li>
+<li class="chapter" data-level="4" data-path="section-missing-values.html"><a href="section-missing-values.html"><i class="fa fa-check"></i><b>4</b> Missing values</a></li>
+<li class="chapter" data-level="5" data-path="section-time-series.html"><a href="section-time-series.html"><i class="fa fa-check"></i><b>5</b> Time Series</a></li>
+<li class="chapter" data-level="6" data-path="section-sss.html"><a href="section-sss.html"><i class="fa fa-check"></i><b>6</b> sss</a><ul>
+<li class="chapter" data-level="6.1" data-path="section-sss.html"><a href="section-sss.html#section-preliminary-analysis"><i class="fa fa-check"></i><b>6.1</b> preliminary analysis</a></li>
+<li class="chapter" data-level="6.2" data-path="section-sss.html"><a href="section-sss.html#section-benefits-of-becomming-a-superhost"><i class="fa fa-check"></i><b>6.2</b> Benefits of becomming a superhost:</a><ul>
+<li class="chapter" data-level="6.2.1" data-path="section-sss.html"><a href="section-sss.html#section-whether-superhost-set-higher-price"><i class="fa fa-check"></i><b>6.2.1</b> Whether superhost set higher price?</a></li>
+<li class="chapter" data-level="6.2.2" data-path="section-sss.html"><a href="section-sss.html#section-whether-superhost-recieve-more-attention-than-none-superhost"><i class="fa fa-check"></i><b>6.2.2</b> Whether superhost recieve more attention than none superhost</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="section-sss.html"><a href="section-sss.html#section-how-to-become-a-supper_host"><i class="fa fa-check"></i><b>6.3</b> How to become a supper_host</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="section-sss.html"><a href="section-sss.html#section-whether-host-should-put-more-house-on-it"><i class="fa fa-check"></i><b>6.3.1</b> Whether host should put more house on it?</a></li>
+<li class="chapter" data-level="6.3.2" data-path="section-sss.html"><a href="section-sss.html#section-what-cancellation-policy-should-host-choose"><i class="fa fa-check"></i><b>6.3.2</b> What cancellation policy should host choose?</a></li>
+<li class="chapter" data-level="6.3.3" data-path="section-sss.html"><a href="section-sss.html#section-what-kind-of-scores-should-the-host-pay-more-attention"><i class="fa fa-check"></i><b>6.3.3</b> What kind of scores should the host pay more attention?</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html"><i class="fa fa-check"></i><b>7</b> Geospatial Analysis</a><ul>
+<li class="chapter" data-level="7.1" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room-type"><i class="fa fa-check"></i><b>7.1</b> Study of Variable ‘Room type’</a></li>
+<li class="chapter" data-level="7.2" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room-count"><i class="fa fa-check"></i><b>7.2</b> Study of Variable ‘Room count’</a></li>
+<li class="chapter" data-level="7.3" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room_rate"><i class="fa fa-check"></i><b>7.3</b> Study of Variable ‘Room_rate’</a></li>
+<li class="chapter" data-level="7.4" data-path="section-geospatial-analysis.html"><a href="section-geospatial-analysis.html#section-study-of-variable-room_price"><i class="fa fa-check"></i><b>7.4</b> Study of Variable ‘Room_price’</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="section-interactive-component.html"><a href="section-interactive-component.html"><i class="fa fa-check"></i><b>8</b> Interactive component</a></li>
+<li class="chapter" data-level="9" data-path="section-conclusion.html"><a href="section-conclusion.html"><i class="fa fa-check"></i><b>9</b> Conclusion</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">AIRBNB Listing Data Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="section-sss" class="section level1">
+<h1><span class="header-section-number">Chapter 6</span> sss</h1>
+<div id="section-preliminary-analysis" class="section level2">
+<h2><span class="header-section-number">6.1</span> preliminary analysis</h2>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>First we look at the price distribution over five county in New York. The distribution is quickly diminished at around 200, which means majority renting price is below 200. If we categrate houses with renting price below 100 as lower tier and above 100 as higher tier. We find that Bronx and Queens have many lower tier houses while Manhattan has houses concentrate more on higher end. This make sence, cause Manhattan is more convinient to travel in New York, and has more entertainment facilities. However, the difference between five conties is not as large as we thought. We want to analyze whether the high price in Manhattan is because of the high demand. So we want to analyze the demand by number of reviews per house.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p>What picks our interests is that when we calculate the average view per house in five different locations, we find that Manhattan which has the highest price recieve lowest number of reviews per house. Next we want to analyze the correlation between price and the number of reviews.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>So we draw a scatter plot to view the correlation. Because there are many extreme price and reviews, therefore, it is hard to see the correlation. However, it seems that price of the houses is in inverse proportion to number of reviews, which means that the more review the house has, the less price it has, and vice versa.</p>
+</div>
+<div id="section-benefits-of-becomming-a-superhost" class="section level2">
+<h2><span class="header-section-number">6.2</span> Benefits of becomming a superhost:</h2>
+<p>In order to find the benefit of superhost, we need to answer two questions. First is whether super hosts set higher price than none super host, second question is whether supper host’s house recieve more reviews than none super host.</p>
+<div id="section-whether-superhost-set-higher-price" class="section level3">
+<h3><span class="header-section-number">6.2.1</span> Whether superhost set higher price?</h3>
+<p>In order to answer the first question, we want to minimize other factors that influence price at first. According to the analysis above, location can influence price. Because we want to recommend houses for students’ parents in Columbia, so we focus the location on Manhattan. Another factor we want to take a look at that will influence price is room_type.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p>In the above graph, it shows that room_type indeed influnce the price. Entire home/apt has the highest price while shared room has the lowest price. This result reminds us that, we should exclude room_type features.</p>
+<p>Then we need to know the geographical distribution of super host. We want to know whether super host is related with geographical location. If it does, we need to rule out that influence.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p>The graph above shows that the distribution between total_host, super_host, none_super_host. The x axis is the percentage of houses in a district. It seems that the distribution for super host and none super host between different district is approximately the same. So we don’t need to rule out location factor.</p>
+<p>Now we can study the influence of super host on price, by focusing on Manhattan and specific room_type.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p>The result is that superhost can set higher price for Hotel_room type, other room_type is not different between super host and none superhost. Because For Private room, Entire home/apt and Shared room, the distribution between super host and none super host is the same. By contrast we know that for Hotel room, the influence from host_type is truely exist.</p>
+</div>
+<div id="section-whether-superhost-recieve-more-attention-than-none-superhost" class="section level3">
+<h3><span class="header-section-number">6.2.2</span> Whether superhost recieve more attention than none superhost</h3>
+<p>Second question we want to ask is whether super host’s house will recieve more review. We take the same steps as the first question. We first rule out other fatcors which will influence review. We do this by classify the house by location and room type, and then we see whether there is difference between superhosts and none superhosts.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p>The result shows that superhost will recieve more reviews for private room, entire home/apt and shared room.</p>
+</div>
+</div>
+<div id="section-how-to-become-a-supper_host" class="section level2">
+<h2><span class="header-section-number">6.3</span> How to become a supper_host</h2>
+<p>We want to give suggestions about how can host become super host, we want to analyze the question from three aspect. First is whether owning more houses will make you a super host, second is what cancellation policy does most super host have, third is what type of score should the host take more attention to than other scores.</p>
+<div id="section-whether-host-should-put-more-house-on-it" class="section level3">
+<h3><span class="header-section-number">6.3.1</span> Whether host should put more house on it?</h3>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p>This graph represents how many houses does each host has. the size of the buble represent the number of houses per host have. We facet this graph to two graph using host_type features to see the difference between super host and none super host. First conclusion we get is that the range of number of houses is large. The highest is amount to 400 plus and the lowest is just 1. However, the number of houses one post is not a determining factor, it is true that superhost tend to hold more houses, but majority of hosts only have less than ten houses. Although having less than 20 houses is not a strong indicator of being a superhost. Having 20 and more houses is a strong indicator of being a super host. We suspect that it is because more houses one have means more time the owner will spend on renting service, which means more thoughtful service.</p>
+</div>
+<div id="section-what-cancellation-policy-should-host-choose" class="section level3">
+<h3><span class="header-section-number">6.3.2</span> What cancellation policy should host choose?</h3>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p>We visualize three variables in this graph. There are five kind of policies for cancellation. Before look at the data, we tend to think that superhost tend to have a more flexible cancellation policy, because it makes sense that more flexible means more satisfaction. However, the graph indicates that strict policy with 14 grace period is actually the most frequent policy super host choose. We suspect the reason be that superhost tend to focus on costumer experience, so that they are confident that it is not their fault to cause cancellation, so they make stricter cancellation policy.</p>
+</div>
+<div id="section-what-kind-of-scores-should-the-host-pay-more-attention" class="section level3">
+<h3><span class="header-section-number">6.3.3</span> What kind of scores should the host pay more attention?</h3>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p>We want to know which feature is more sensitive to customers. The measurment method is by calculating variance of the score for each features. The justification is that, the more variance one feature has, the more consideration from customer it includes. If all of the score is one hundred, it either means fake posts, or this feature is hard to tell the difference from customer. However, if the data is distributed from 0 to 100 in a bell shaped curve, it means that customer can tell the difference and it is worth more attention from the host to improve that. However, bell shape is just in theory, generally speaking, the shape can be in many forms. The result is that cleanliness has the largest variance and therefore, most sensitive to customers.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p>We first calculate the mean score for five features between super host and none superhost, but the mean scores are hard to tell the difference, we suspect it is because there are so many full score which interfere the analysis. So we want to analyze on the perspective of unsatisfactory rate.</p>
+<p>We define unsatisfatory rate as the percentage of scores that are under 95% of the full score. The justification is that full score hardly reveal any information, because no such things as perfect. There always will be a way to improve. Generally speaking, there are two circumstances for full score rating, first is out of exaggeration, second is fake post. So we decide to only focus on the score which is much lower that is enough to reveal some shortages of the houses. It turns out 95% is a good cut off which will reveal us some significant findings.</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<p>The y axis represent unsatisfactory rate for superhost and none superhost. Generally speaking, superhost did better on accuracy, chekin and communication. For cleanliness and location, superhost and none superhost both have room of improvement, although superhost has less unsatisfactory customers than none superhost.</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="section-time-series.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="section-geospatial-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/zheliman/5702Project/edit/master/06-Superhost.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/zheliman/5702Project/blob/master/06-Superhost.Rmd",
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
