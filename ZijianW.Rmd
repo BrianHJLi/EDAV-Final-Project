@@ -1,0 +1,285 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(UsingR)
+library(tidyr)
+library(forcats)
+library(grid)
+library(gridExtra)
+library(plotly)
+```
+
+```{r echo=FALSE}
+listing <- read.csv(file="listings.csv")
+listing$review_scores_rating<-as.numeric(listing$review_scores_rating)
+listing$review_scores_cleanliness<-as.numeric(listing$review_scores_cleanliness)
+listing$price<-parse_number(as.character(listing$price))
+```
+
+
+## preliminary analysis
+```{r echo=FALSE}
+district<-unique(listing$neighbourhood_group_cleansed)
+district_price<-listing[listing$neighbourhood_group_cleansed %in% district, c('neighbourhood_group_cleansed','price')]
+district_price<-district_price[district_price$price<=300,c('neighbourhood_group_cleansed','price')]
+```
+
+```{r echo=FALSE}
+ggplot(district_price) + geom_density(aes(x = (price), color = neighbourhood_group_cleansed), alpha = 0.2,adjust=2)+
+  ggtitle('location influence on price')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+```
+
+First we look at the price distribution over five county in New York. The distribution is quickly diminished at around 200, which means majority renting price is below 200. If we categrate houses with renting price below 100 as lower tier and above 100 as higher tier. We find that Bronx and Queens have many lower tier houses while Manhattan has houses concentrate more on higher end. This make sence, cause Manhattan is more convinient to travel in New York, and has more entertainment facilities. However, the difference between five conties is not as large as we thought. We want to analyze whether the high price in Manhattan is because of the high demand. So we want to analyze the demand by number of reviews per house.
+
+```{r echo=FALSE}
+mean_review<-listing%>%group_by(neighbourhood_group_cleansed)%>%summarise(mean_score=mean(number_of_reviews))
+ggplot(mean_review,aes(x=neighbourhood_group_cleansed,y=mean_score))+geom_bar(stat = 'identity',fill='blue')
+```
+
+What picks our interests is that when we calculate the average view per house in five different locations, we find that Manhattan which has the highest price recieve lowest number of reviews per house. Next we want to analyze the correlation between price and the number of reviews. 
+
+```{r echo=FALSE}
+ggplot(listing,aes(x=number_of_reviews,y=price))+
+  geom_point()
+```
+
+So we draw a scatter plot to view the correlation. Because there are many extreme price and reviews, therefore, it is hard to see the correlation. However, it seems that price of the houses is in inverse proportion to number of reviews, which means that the more review the house has, the less price it has, and vice versa.
+
+
+## Benefits of becomming a superhost:
+
+In order to find the benefit of superhost, we need to answer two questions. First is whether super hosts set higher price than none super host, second question is whether supper host's house recieve more reviews than none super host. 
+
+### Whether superhost set higher price?
+
+In order to answer the first question, we want to minimize other factors that influence price at first. According to the analysis above, location can influence price. Because we want to recommend houses for students' parents in Columbia, so we focus the location on Manhattan. Another factor we want to take a look at that will influence price is room_type.
+
+```{r echo=FALSE}
+room_type<-listing[,c('room_type','price')]
+room_type<-room_type[room_type$price<=500,]
+ggplot(room_type) + geom_density(aes(x = (price), color = room_type), alpha = 0.2,adjust=2)+
+  ggtitle('room type influence on price')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+```
+
+In the above graph, it shows that room_type indeed influnce the price. Entire home/apt has the highest price while shared room has the lowest price. This result reminds us that, we should exclude room_type features.
+
+Then we need to know the geographical distribution of super host. We want to know whether super host is related with geographical location. If it does, we need to rule out that influence.
+
+```{r echo=FALSE}
+geo_house1<-listing[listing$neighbourhood_group_cleansed=='Manhattan',]%>%group_by(neighbourhood) %>% summarise(number_of_house=n())
+geo_house1<-geo_house1[!(geo_house1$neighbourhood %in% 'Manhattan'),]
+
+geo_house2<-listing[c(listing$neighbourhood_group_cleansed=='Manhattan' & listing$host_is_superhost=='t'),]%>%group_by(neighbourhood) %>% summarise(number_of_house=n()/9343)
+geo_house2<-geo_house2[!(geo_house2$neighbourhood %in% 'Manhattan'),]
+
+geo_house3<-listing[c(listing$neighbourhood_group_cleansed=='Manhattan' & listing$host_is_superhost=='f'),]%>%group_by(neighbourhood) %>% summarise(number_of_house=n()/39000)
+geo_house3<-geo_house3[!(geo_house3$neighbourhood %in% 'Manhattan'),]
+geo_house2$host_type='superhost'
+geo_house3$host_type='not superhost'
+geo_house4<-rbind(geo_house2,geo_house3)
+ggplot(geo_house4)+
+  geom_bar(aes(x=neighbourhood,y=number_of_house,fill=host_type),stat = 'identity',position='dodge')+
+  coord_flip()
+```
+
+
+The graph above shows that the distribution between total_host, super_host, none_super_host. The x axis is the percentage of houses in a district. It seems that the distribution for super host and none super host between different district is approximately the same. So we don't need to rule out location factor.
+
+Now we can study the influence of super host on price, by focusing on Manhattan and specific room_type.
+
+```{r echo=FALSE}
+uperwest_private<-listing[c(listing$neighbourhood_group_cleansed=='Manhattan'&listing$room_type=='Private room'),]
+uperwest_private<-uperwest_private[uperwest_private$host_is_superhost %in% c('t','f'),]
+p1<-ggplot(uperwest_private)+geom_density(aes(x=log(price),fill=host_is_superhost),alpha=0.5)+
+  scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))+
+  ggtitle('Private room')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+uperwest_private<-listing[c(listing$neighbourhood_group_cleansed=='Manhattan'&listing$room_type=='Hotel room'),]
+uperwest_private<-uperwest_private[uperwest_private$host_is_superhost %in% c('t','f'),]
+p2<-ggplot(uperwest_private)+geom_density(aes(x=log(price),fill=host_is_superhost),alpha=0.5)+
+  scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))+
+  ggtitle('Hotel room')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+uperwest_private<-listing[c(listing$neighbourhood_group_cleansed=='Manhattan'&listing$room_type=='Shared room'),]
+uperwest_private<-uperwest_private[uperwest_private$host_is_superhost %in% c('t','f'),]
+p3<-ggplot(uperwest_private)+geom_density(aes(x=log(price),fill=host_is_superhost),alpha=0.5)+
+  scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))+
+  ggtitle('Shared room')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+uperwest_private<-listing[c(listing$neighbourhood_group_cleansed=='Manhattan'&listing$room_type=='Entire home/apt'),]
+uperwest_private<-uperwest_private[uperwest_private$host_is_superhost %in% c('t','f'),]
+p4<-ggplot(uperwest_private)+geom_density(aes(x=log(price),fill=host_is_superhost),alpha=0.5)+
+  scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))+
+  ggtitle('Entire home/apt')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+
+grid.arrange(p1,p2,p3,p4,nrow=2)
+```
+
+The result is that superhost can set higher price for Hotel_room type, other room_type is not different between super host and none superhost. Because For Private room, Entire home/apt and Shared room, the distribution between super host and none super host is the same. By contrast we know that for Hotel room, the influence from host_type is truely exist. 
+
+### Whether superhost recieve more attention than none superhost
+
+Second question we want to ask is whether super host's house will recieve more review. We take the same steps as the first question. We first rule out other fatcors which will influence review. We do this by classify the house by location and room type, and then we see whether there is difference between superhosts and none superhosts.
+
+```{r echo=FALSE}
+review_number<-listing[!(listing$host_is_superhost %in% c('')),c('number_of_reviews','host_is_superhost','room_type','neighbourhood_group_cleansed')]
+review_number1<-review_number[c(review_number$neighbourhood_group_cleansed=='Manhattan'&review_number$room_type=='Hotel room'),]
+p1<-ggplot(review_number1) + geom_density(aes(x = log(number_of_reviews), fill = host_is_superhost ), alpha = 0.5)+ggtitle('Hotel room')+theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))+
+   scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))
+
+review_number2<-review_number[c(review_number$neighbourhood_group_cleansed=='Manhattan'&review_number$room_type=='Private room'),]
+p2<-ggplot(review_number2) + geom_density(aes(x = log(number_of_reviews), fill = host_is_superhost ), alpha = 0.5)+ggtitle('Private room')+theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))+
+   scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))
+review_number3<-review_number[c(review_number$neighbourhood_group_cleansed=='Manhattan'&review_number$room_type=='Entire home/apt'),]
+p3<-ggplot(review_number3) + geom_density(aes(x = log(number_of_reviews), fill = host_is_superhost ), alpha = 0.5)+ggtitle('Entire home/apt')+theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))+
+   scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))
+review_number4<-review_number[c(review_number$neighbourhood_group_cleansed=='Manhattan'&review_number$room_type=='Shared room'),]
+p4<-ggplot(review_number4) + geom_density(aes(x = log(number_of_reviews), fill = host_is_superhost ), alpha = 0.5)+ggtitle('Shared room')+theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))+
+   scale_fill_discrete(breaks=c("t","f"),labels=c('supperhost','not supperhost'))
+
+grid.arrange(p1,p2,p3,p4,nrow=2)
+
+```
+
+The result shows that superhost will recieve more reviews for private room, entire home/apt and shared room. 
+
+## How to become a supper_host
+
+We want to give suggestions about how can host become super host, we want to analyze the question from three aspect. First is whether owning more houses will make you a super host, second is what cancellation policy does most super host have, third is what type of score should the host take more attention to than other scores.
+
+### Whether host should put more house on it?  
+```{r echo=FALSE}
+hostID<-listing %>%
+  group_by(host_id,host_is_superhost) %>%
+  summarise(number_of_houses=n())
+hostID<-hostID[!(hostID$host_is_superhost %in% c('')),]
+levels(hostID$host_is_superhost)<-c('','superhost','not_superhost')
+ggplot(hostID,aes(x=host_id,y=number_of_houses,size=number_of_houses)) +
+  geom_point(color='blue')+
+  facet_grid('host_is_superhost')+
+  ggtitle('How many houses dose host have')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+```
+
+This graph represents how many houses does each host has. the size of the buble represent the number of houses per host have. We facet this graph to two graph using host_type features to see the difference between super host and none super host. First conclusion we get is that the range of number of houses is large. The highest is amount to 400 plus and the lowest is just 1. However, the number of houses one post is not a determining factor, it is true that superhost tend to hold more houses, but majority of hosts only have less than ten houses. Although having less than 20 houses is not a strong indicator of being a superhost. Having 20 and more houses is a strong indicator of being a super host. We suspect that it is because more houses one have means more time the owner will spend on renting service, which means more thoughtful service.
+
+### What cancellation policy should host choose?
+```{r echo=FALSE}
+cancel_policy<-listing[,c('cancellation_policy','host_is_superhost')]
+cancel_policy<-cancel_policy%>%group_by(host_is_superhost,cancellation_policy)
+cancel_policy_superhost<-cancel_policy[cancel_policy$host_is_superhost=='t',] %>% group_by(cancellation_policy)%>%summarise(percent=n()/9343)
+cancel_policy_not_superhost<-cancel_policy[cancel_policy$host_is_superhost=='f',]%>%group_by(cancellation_policy)%>%summarise(percent=n()/39013)
+cancel_policy_superhost$host_type<-'supper_host'
+cancel_policy_not_superhost$host_type<-'not_supper_host'
+cancel_total_data<-rbind(cancel_policy_not_superhost,cancel_policy_superhost)
+legend_size <- c(10,8,5,1,5,8,10)
+ggplot(cancel_total_data,aes(y=cancellation_policy,x=host_type,size=percent,colour=percent))+
+  geom_point()+
+  theme(legend.position="bottom") +
+  scale_size(breaks = c(-3:3), range = c(10,20)) +
+  guides(
+    color= guide_legend(), 
+    size=guide_legend(override.aes = list(size = legend_size))
+  )+
+  ggtitle('Cancellation policy analysis')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+```
+
+We visualize three variables in this graph. There are five kind of policies for cancellation. Before look at the data, we tend to think that superhost tend to have a more flexible cancellation policy, because it makes sense that more flexible means more satisfaction. However, the graph indicates that strict policy with 14 grace period is actually the most frequent policy super host choose. We suspect the reason be that superhost tend to focus on costumer experience, so that they are confident that it is not their fault to cause cancellation, so they make stricter cancellation policy. 
+
+### What kind of scores should the host pay more attention?
+```{r echo=FALSE}
+rating1<-var((listing$review_scores_rating),na.rm = TRUE)
+cleanliness1<-var(listing$review_scores_cleanliness,na.rm = TRUE)
+accuracy1<-var((listing$review_scores_accuracy),na.rm=TRUE)
+checkin1<-var((listing$review_scores_checkin),na.rm=TRUE)
+communication1<-var((listing$review_scores_communication),na.rm=TRUE)
+location1<-var((listing$review_scores_location),na.rm = TRUE)
+
+df1<-data.frame(host_type=c('superhost','superhost','superhost','superhost','superhost'),features=c('cleanliness','accuracy','checkin','communication','location'),vars=c(cleanliness1,accuracy1,checkin1,communication1,location1))
+ggplot(df1, aes(y=vars, x=features)) + 
+    geom_bar(stat="identity",fill = "blue",alph=0.2)+
+  ggtitle('Which feature is more sensitive to customer')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+```
+
+We want to know which feature is more sensitive to customers. The measurment method is by calculating variance of the score for each features. The justification is that, the more variance one feature has, the more consideration from customer it includes. If all of the score is one hundred, it either means fake posts, or this feature is hard to tell the difference from customer. However, if the data is distributed from 0 to 100 in a bell shaped curve, it means that customer can tell the difference and it is worth more attention from the host to improve that. However, bell shape is just in theory, generally speaking, the shape can be in many forms. The result is that cleanliness has the largest variance and therefore, most sensitive to customers.
+
+```{r echo= FALSE}
+
+cleanliness1<-mean(listing[listing$host_is_superhost=='t','review_scores_cleanliness'],na.rm = TRUE)
+accuracy1<-mean(listing[listing$host_is_superhost=='t','review_scores_accuracy'],na.rm=TRUE)
+checkin1<-mean(listing[listing$host_is_superhost=='t','review_scores_checkin'],na.rm=TRUE)
+communication1<-mean(listing[listing$host_is_superhost=='t','review_scores_communication'],na.rm=TRUE)
+location1<-mean(listing[listing$host_is_superhost=='t','review_scores_location'],na.rm=TRUE)
+
+cleanliness2<-mean(listing[listing$host_is_superhost=='f','review_scores_cleanliness',],na.rm=TRUE)
+accuracy2<-mean(listing[listing$host_is_superhost=='f','review_scores_accuracy'],na.rm=TRUE)
+checkin2<-mean(listing[listing$host_is_superhost=='f','review_scores_checkin'],na.rm=TRUE)
+communication2<-mean(listing[listing$host_is_superhost=='f','review_scores_communication'],na.rm=TRUE)
+location2<-mean(listing[listing$host_is_superhost=='f','review_scores_location'],na.rm=TRUE)
+
+df1<-data.frame(host_type=c('superhost','superhost','superhost','superhost','superhost'),features=c('cleanliness','accuracy','checkin','communication','location'),rate=c(cleanliness1,accuracy1,checkin1,communication1,location1))
+df2<-data.frame(host_type=rep(c('not_superhost'),time=5),features=c('cleanliness','accuracy','checkin','communication','location'),rate=c(cleanliness2,accuracy2,checkin2,communication2,location2))
+df3<-rbind(df1,df2)
+ggplot(df3, aes(fill=host_type, y=rate, x=features)) + 
+    geom_bar(position="dodge", stat="identity")+
+  ggtitle('Unsatisfy rate comparison')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+
+```
+
+We first calculate the mean score for five features between super host and none superhost, but the mean scores are hard to tell the difference, we suspect it is because there are so many full score which interfere the analysis. So we want to analyze on the perspective of unsatisfactory rate. 
+
+We define unsatisfatory rate as the percentage of scores that are under 95% of the full score. The justification is that full score hardly reveal any information, because no such things as perfect. There always will be a way to improve. Generally speaking, there are two circumstances for full score rating, first is out of exaggeration, second is fake post. So we decide to only focus on the score which is much lower that is enough to reveal some shortages of the houses. It turns out 95% is a good cut off which will reveal us some significant findings.
+
+```{r echo=FALSE}
+supperhost<-listing[listing$host_is_superhost=='t',] 
+not_supperhost<-listing[listing$host_is_superhost=='f',]
+
+rating1<-nrow(supperhost[supperhost$review_scores_rating<95,])/nrow(supperhost)
+cleanliness1<-nrow(supperhost[supperhost$review_scores_cleanliness<9.5,])/nrow(supperhost)
+accuracy1<-nrow(supperhost[supperhost$review_scores_accuracy<9.5,])/nrow(supperhost)
+checkin1<-nrow(supperhost[supperhost$review_scores_checkin<9.5,])/nrow(supperhost)
+communication1<-nrow(supperhost[supperhost$review_scores_communication<9.5,])/nrow(supperhost)
+location1<-nrow(supperhost[supperhost$review_scores_location<9.5,])/nrow(supperhost)
+
+rating2<-nrow(not_supperhost[not_supperhost$review_scores_rating<95,])/nrow(not_supperhost)
+cleanliness2<-nrow(not_supperhost[not_supperhost$review_scores_cleanliness<9.5,])/nrow(not_supperhost)
+accuracy2<-nrow(not_supperhost[not_supperhost$review_scores_accuracy<9.5,])/nrow(not_supperhost)
+checkin2<-nrow(not_supperhost[not_supperhost$review_scores_checkin<9.5,])/nrow(not_supperhost)
+communication2<-nrow(not_supperhost[not_supperhost$review_scores_communication<9.5,])/nrow(not_supperhost)
+location2<-nrow(not_supperhost[not_supperhost$review_scores_location<9.5,])/nrow(not_supperhost)            
+
+df1<-data.frame(host_type=c('superhost','superhost','superhost','superhost','superhost'),features=c('cleanliness','accuracy','checkin','communication','location'),rate=c(cleanliness1,accuracy1,checkin1,communication1,location1))
+df2<-data.frame(host_type=rep(c('not_superhost'),time=5),features=c('cleanliness','accuracy','checkin','communication','location'),rate=c(cleanliness2,accuracy2,checkin2,communication2,location2))
+df3<-rbind(df1,df2)
+ggplot(df3, aes(fill=host_type, y=rate, x=features)) + 
+    geom_bar(position="fill", stat="identity")+
+  ggtitle('Unsatisfy rate comparison')+
+  theme(plot.title = element_text(lineheight=.8, face="bold",hjust=0.5))
+
+```
+
+The y axis represent unsatisfactory rate for superhost and none superhost. Generally speaking, superhost did better on accuracy, chekin and communication. For cleanliness and location, superhost and none superhost both have room of improvement, although superhost has less unsatisfactory customers than none superhost.
+
+
+
+
+
+
+
+
+
