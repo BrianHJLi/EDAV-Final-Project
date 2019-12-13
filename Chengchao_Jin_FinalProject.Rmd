@@ -1,0 +1,208 @@
+---
+title: "final project"
+author: "Jin Chengchao"
+date: "12/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE)
+
+```
+
+```{r}
+library(lubridate)
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(gridExtra)
+library(ggmosaic)
+```
+
+```{r}
+
+calendar<-read_csv("/Users/jinchengchao/Downloads/calendar.csv")
+listing<-read_csv("/Users/jinchengchao/Downloads/listings.csv")
+```
+
+```{r}
+## Delete $ sign in price columns
+calendar$price<-parse_number(calendar$price)
+calendar$adjusted_price<-parse_number(calendar$adjusted_price)
+```
+
+```{r}
+## Create booked data frame to only extract available==FALSE
+## Create unbooked data frame to only extract available==TRUE
+booked<-calendar[calendar$available==FALSE,]
+unbooked<-calendar[calendar$available==TRUE,]
+```
+
+### Analysis of Seasonality and Time Effect
+We want to analyze the seasonality of Airbnb housing prices using the calendar dataset. The variable available denotes the availability of every Airbnb listing in New York area from 9/12/2019 to 9/11/2020. Since customers always have general judgement about the overall quality of the housing, those booked listings can be perceived as being more likely to be fairly priced and reflect the price condition of rental market in New York area. When we want to book a house, we usually search through most of possible listings to find the optimal choice. So analyzing booked housing can better help us to make decision.
+
+
+#### Time effect on demand
+
+```{r}
+# Then, we want to analyze the number of Booking Housing for each day from 2019/9/12-2020/9/11
+sum_house<-booked%>%group_by(date)%>%summarise(sum=n())
+
+ggplot(sum_house[which(sum_house$date!="2020-9-12"),], aes(date,sum)) + 
+  geom_point(color="#656565",fill="#abd9e9",alpha=0.7,size=2.5,shape=21)+
+  labs(x = "Date", y = "Sum of Booked Housing",title="Sum of Booked Housing in One Year",subtitle=" From 9/12/19 to 9/11/20",caption="Data source: Airbnb calendar data")+
+   theme(plot.subtitle = element_text(color = "#727072"),
+  plot.caption = element_text(color = "grey",face = "italic"))+
+  annotate("text", x = c(ymd("2019-12-30"),ymd("2020-3-10"),ymd("2020-6-8")), y = c(18000,18000,18000),
+           label = c(" 12/30/2019\n New Year"," 3/10/2020\n Spring Break"," 6/8/2020\n Summer Break"), color = "#FF4482",
+           hjust = 0)+
+  geom_vline(xintercept = c(ymd("2019-12-30"),ymd("2020-3-10"),ymd("2020-6-8")), color = "#FF4482",lty=2)+theme_light()
+```
+This time series plot analyzed the sum of booked housing from 9/12/19 to 9/11/20. Using the time seires plot, we can see two outliers on 9/12/2019 and 9/11/20 which are the first and last days of our data. The existence of these could be due to data collecting issues and we can reasonably ignore these two data points in our analysis below. Although the booked housing quantity is not equivalent to the actual checkin amount and many people prefer to book housing within one month of departure, we can still analyze the sum of booked housing data as there already exists some clear pattern in the plot.  
+Starting from 9/13/19 when the sum of booked housing reaches its peak, the amount of booked housing gradually decreases until mid November. This happens because the rental condition on 9/13/19 is closest to the actual check-in amount. As time get further away from today, there will be more potential customers who may plan but have not yet booked an Airbnb right now. Given the stable level of housing demand on October, the downward trend looks reasonable.
+After mid November, the amount of rental gradually increases and reaches its local peak on 12/30/19. Then, the amount sharply declines. This transition can be safely interpreted by the advent of New Year's day. The sum of rental remains stable afterwards but there is an immediate rise on 3/10/20, which is exactly the starting time of spring break. Another immediate rise happens on 6/8/20 which is the start of summer vacation. Apparently, the demand of housing is strongly related with long holidays. Those holidays largely increase the demand of Airbnb housing in New York area, which partly reflect the popularity of New York area as a traveling place. Also, leasing contracts of at least 3 months may contribute to the stability of rented housing as the lines are almost horizontal for each time interval between dashed lines.
+Overall, the advent of long holidays can largely increase the demand of housing. Because of the limitation of total amount of Airbnb listing in New York, the higher amount of booked housing means the lower availability of high quality houses. Theoretically, the higher demand leads to the higher price. So we can further analyze the price in a year to confirm our conclusion.
+
+#### Time effect on price
+
+```{r}
+#We first want to analyze the seasonality of the Airbnb price in New York in a year. We use mean housing price for the same day.
+
+mean_price<-booked%>%group_by(date)%>%summarise(mean=mean(price,na.rm=TRUE))
+
+ggplot(mean_price[which(mean_price$date!="2020-9-12"),], aes(date,mean)) + 
+  geom_point(color="#656565",fill="#abd9e9",alpha=0.7,size=2.5,shape=21)+ 
+  labs(x = "Date", y = "Average Price",title="Average Price of All Booked Housing",subtitle=" From 9/12/19 to 9/11/20",caption="Data source: Airbnb calendar data")+
+  annotate("text", x = ymd("2019-12-28"), y = 128,
+           label = " 12/28/2019\n Max Average Price", color = "#FF4482",
+           hjust = 0)+
+  theme(plot.subtitle = element_text(color = "#727072"),
+  plot.caption = element_text(color = "grey",face = "italic"))+
+  geom_vline(xintercept = ymd("2019-12-28"),color = "#FF4482")+theme_light()
+```
+
+The time series plot above shows the variability of price in a change. Same as above, we do not analyze two outliers because of data collection issues.
+First, we can find a huge increment in average price at the end of the year. The price starts to increase from the middle of Decmember and reaches its maximum on 12/28/2019. After New Year's Day, the price turns back to normal level. Since the demand of housing is positively related to its price, such increase in price reflects the steep rise in housing demand. It can be attributed to the start of winter break and the popularity of traveling to New York for celebrating New Year's Day.
+Also, there is a price drift around the middle of March. It corresponds to the beginning of spring break and the popularity of New York city as the traveling destination at that time.
+The average price of listing vibrates a lot from October to December. We can observe that the price reaches its minimum on 11/18/19. The price remains stable and comparatively low from mid January to mid March. The price is also stable but slightly higher after April.
+So based on this plot, all of the observations are consistent to the demand change analyzed before. According to the price data, we find that The most expensive timing is from mid December to mid January. On the other hand, the most economical timing for booking Airbnb housing is November, January and Februray which are most suitable time to travel to New York if we want to minimize the rental expense. 
+
+
+
+
+## Booked Housing VS. Available Listing
+#### Mean price comparison
+```{r}
+ggplot(na.omit(calendar[calendar$price<=400&calendar$price>=100,]),aes(x=factor(available),y=price))+
+  geom_boxplot(fill=c("#ffffbf","#abd9e9"),color="#473e2c")+labs(x="Housing Availability",y="Price of Housing",title = "Comparing Prices of Booked and Unbooked Housing",subtitle="Prices between $100-$400",caption="Data source: Airbnb calendar data")+
+  theme(
+  plot.subtitle = element_text(color = "#727072"),
+  plot.caption = element_text(color = "grey", face = "italic")
+)
+
+```
+
+Because of the family budget constraint, we only looked at the housings with price larger than 100 dollars and lower than 400 dollars. From the boxplot above, the booked properties have lower mean price than unbooked ones. The interquartile range for booked housings are largely smaller than that of availble housings. The boxplot gives us an overview about the relationship between availability and price. We still need to analyze further in detail.
+
+```{r}
+calendar$label<-rep(NA,nrow(calendar))
+calendar$label[calendar$price>=100&calendar$price<=150]<-"101-150"
+calendar$label[calendar$price<=200&calendar$price>150]<-"151-200"
+calendar$label[calendar$price<=250&calendar$price>200]<-"201-250"
+calendar$label[calendar$price<=300&calendar$price>250]<-"251-300"
+calendar$label[calendar$price<=350&calendar$price>300]<-"301-350"
+calendar$label[calendar$price<=400&calendar$price>350]<-"351-400"
+summ_samp_comb<-calendar%>%group_by(label,available)%>%summarise(sum=n())
+#ggplot(na.omit(summ_samp_comb),aes(x=label,y=sum,fill=available))+geom_bar(position = "dodge",stat="identity")+scale_fill_manual(values=c("#b2df8a","#a6cee3"))
+```
+
+
+```{r}
+calendar$label_night<-rep(NA,nrow(calendar))
+calendar$label_night[calendar$minimum_nights<=3]<-"Below 3"
+calendar$label_night[calendar$minimum_nights<=6&calendar$minimum_nights>3]<-"3-6"
+calendar$label_night[calendar$minimum_nights<=9&calendar$minimum_nights>6]<-"7-9"
+calendar$label_night[calendar$minimum_nights>9]<-"Above 10"
+calendar$label_night<-factor(calendar$label_night,levels = c("Below 3","3-6","7-9","Above 10"))
+summ_samp_comb_night<-calendar[calendar$price<=400&calendar$price>=100,]%>%group_by(label_night,available)%>%summarise(sum=n())
+#ggplot(na.omit(summ_samp_comb_night),aes(x=label_night,y=sum,fill=available))+geom_bar(position = "dodge",stat="identity")+scale_fill_manual(values=c("#b2df8a","#a6cee3"))
+```
+
+#### Proportion Comparison with Binned Price
+```{r}
+
+ggplot(data=summ_samp_comb) + 
+  geom_mosaic(
+    aes(x=product(available,label), # cut from right to left 
+        weight=sum,
+        fill=available),
+    na.rm=TRUE,
+    divider=c("vspine" , "hspine") # equivalent to divider=ddecker()
+  ) +
+  scale_fill_manual(values=c("#FF72A6","#a6cee3"))+
+  labs(x="Price Interval",y="Availability",title = "Availability proportion in different price interval",subtitle = "Price between $101-$400",caption = "Data source: Airbnb calendar data")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),plot.subtitle = element_text(color = "#727072"),
+  plot.caption = element_text(color = "grey", face = "italic"))
+```
+
+We bin the price to six levels: \$101-\$150, \$151-\$200, \$201-\$250, \$251-\$300, \$301-\$350, \$351-\$400. It helps us better visualize availability proportion for different quality levels of properties. We can see that as price goes up, the proportion of booked properties gets gradually smaller. The price interval \$101-\$150 has highest proportion of booked housing which is around 75% while the price interval \$351-\$400 has lowest proportion which is around 50%. Also, about 40% of housing are priced between \$101-\$150 and about 80% of housing are priced between \$101-\$300. As price gets higher, the count of housing gets smaller and smaller. 
+So if we want to lower the rental cost, we need to book the housing as early as possible because cheaper housings are always first to be booked and the available listings are generally more expensive. Even though we want to find a good housing with price between \$301-\$400, it would be much better to plan ahead as there are much samller number of listings and over half of total properties in this price interval have already been booked. 
+
+#### Minimum night
+```{r}
+library(ggmosaic)
+summ_samp_comb_night<-na.omit(summ_samp_comb_night)
+summ_samp_comb_night$available<-factor(summ_samp_comb_night$available)
+# equivalent to doing Favorite ~ Age + Music in vcd::mosaic with doubledecker style cut
+ggplot(data=summ_samp_comb_night) + 
+  geom_mosaic(
+    aes(x=product(available,label_night), # cut from right to left 
+        weight=sum,
+        fill=available),
+    divider=c("vspine" , "hspine") # equivalent to divider=ddecker()
+  ) +
+  scale_fill_manual(values=c("#FF72A6","#a6cee3"))+
+  labs(x="Minimum Nights Interval",y="Availability",title = "Availability proportion in different price interval",subtitle = "Price between $101-$400",caption = "Data source: Airbnb calendar data")+
+  theme(plot.subtitle = element_text(color = "#727072"),
+  plot.caption = element_text(color = "grey", face = "italic"))
+```
+
+We also take a deeper look at the relationship between binned minimum night and availability of Airbnb housing. We created four levels of minimum nights: "Below 3", "3-6", "7-9", "Above 10". About 60% of housings have minimum nights below 3. It makes sense as Airbnb mainly provides short term rental. For these housings, about 75% has already been booked. Around 20% of housings have minimum nights between 3 to 6. The count of housings with minimum
+nights between 7 to 9 is lowest among all levels. The proportion of availability for these two types are similar and lowest among all levels. Surprisingly to us, around 20% of housings have minimum nights above 10 days. The proportion of booking rate of this type, which is smaller than 50%, is lowest among all four levels. 
+
+```{r}
+calendar$weekday<-weekdays(calendar$date,abbreviate = TRUE)
+```
+
+```{r}
+mean_price$weekday<-weekdays(mean_price$date)
+
+#max(mean_price$mean[mean_price$weekday=="Monday"])
+#max(mean_price$mean[mean_price$weekday=="Tuesday"])
+#max(mean_price$mean[mean_price$weekday=="Wednesday"])
+#max(mean_price$mean[mean_price$weekday=="Thursday"])
+#max(mean_price$mean[mean_price$weekday=="Friday"])
+#max(mean_price$mean[mean_price$weekday=="Saturday"])
+#max(mean_price$mean[mean_price$weekday=="Sunday"])
+mean_price$weekday<-factor(mean_price$weekday,levels = c("Wednesday","Thursday","Sunday","Monday","Tuesday","Saturday","Friday"))
+```
+
+#### Average Price Comparison based on Weekdays
+```{r fig.width=10,fig.height=5}
+library("ggridges")
+library("tidyverse")
+ggplot(na.omit(mean_price), aes(x=mean,y=weekday,fill = weekday))+
+  geom_density_ridges(scale = 1.5, alpha=0.5) + theme_ridges()+
+  scale_fill_brewer(palette = 4)+
+  scale_y_discrete(expand = c(0.1, 0)) +
+  scale_x_continuous(expand = c(0.001, 0),limits = c(130,160))+
+  labs(x="Average price of certain weekday for one year", y="Weekdays ordered by max average price",caption = "Data source: Airbnb calendar data")+
+  ggtitle("Ridgeline Plot of Average Price for Different Weekdays from 9/12/19 to 9/11/20")+
+  theme(plot.title = element_text(hjust = 0.5),plot.caption = element_text(color = "grey", face = "italic"))
+```
+
+The ridgeline plot above shows the average price distribution for different weekdays from 9/12/19 to 9/11/20. The y axis is ordered by the average price of peaks on each weekday.
+The graph clearly shows that the average price distributions are quite similar for all of weekdays. Also, from Sunday to Thursday, all of their average price density curves have peaks on the similar average price while there exhibits an obvious right shift of curves on Friday and Saturday. This pattern can be explained by the lodging demands when people from other cities travel to New York on weekends. The higher on Friday but not on Sunday may be explained by visitors' preference to arrive in New York on Friday night. They can not live in New York on Sunday as they may work or take classes on Monday.
+
+
+
